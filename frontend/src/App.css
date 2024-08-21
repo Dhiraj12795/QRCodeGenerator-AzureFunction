@@ -1,0 +1,23 @@
+.App {
+    text-align: center;
+    margin-top: 50px;
+  }
+  
+  input {
+    padding: 10px;
+    font-size: 16px;
+    margin-right: 10px;
+  }
+  
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+  
+  img {
+    margin-top: 20px;
+    border: 1px solid #ccc;
+  }
+
+  
+  

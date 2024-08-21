@@ -1,0 +1,2 @@
+azure-functions
+qrcode[pil]

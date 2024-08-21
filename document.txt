@@ -1,0 +1,8 @@
+// Create a javascript project via cli //
+
+command- func init <project-folder> --worker-runtime javascript --model v4
+
+// Create function
+func new --template "Http trigger" --name <yourhttptrigger>
+
+

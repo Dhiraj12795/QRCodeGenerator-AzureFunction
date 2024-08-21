@@ -1,0 +1,59 @@
+const QRCode = require('qrcode');
+const { BlobServiceClient } = require('@azure/storage-blob');
+const connectionString = process.env.STORAGE_CONNECTION_STRING; // Ensure this environment variable is set
+
+module.exports = async function (context, req) {
+    context.log('Generating QR code');
+
+    const url = req.query.url || (req.body && req.body.url); // Simplified URL fetching
+    if (!url) {
+        context.res = {
+            status: 400,
+            body: "Please pass a URL in the query string or in the request body"
+        };
+        return;
+    }
+
+    try {
+        // Generate QR Code as a base64 encoded string
+        const qrCodeData = await QRCode.toDataURL(url);
+
+        // Connect to Azure Blob Storage
+        const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
+        const containerName = 'qr-codes';
+        const containerClient = blobServiceClient.getContainerClient(containerName);
+        await containerClient.createIfNotExists({ access: 'blob' });
+
+        // Create a valid blob name by removing 'https://' or 'http://' from the URL
+        const modifiedUrl = url.replace(/^https?:\/\//, '');
+        const blobName = `${modifiedUrl}.png`;
+        const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+        // Decode the base64 image data
+        const matches = qrCodeData.match(/^data:image\/png;base64,(.+)$/); // Ensure it matches only PNG data
+        if (!matches) {
+            throw new Error("Invalid QR code data format.");
+        }
+        const buffer = Buffer.from(matches[1], 'base64'); // Use matches[1] for the base64 content
+
+        // Upload the decoded image to Azure Blob Storage
+        await blockBlobClient.upload(buffer, buffer.length);
+
+        // Respond with the URL of the uploaded QR code
+        context.res = {
+            status: 200,
+            body: { qr_code_url: blockBlobClient.url }, // Use blockBlobClient.url for the blob's URL
+            headers: {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*' // Allow CORS for all origins (for testing purposes)
+            }
+        };
+
+    } catch (error) {
+        context.log('Error generating QR code:', error); // Log the error for debugging purposes
+        context.res = {
+            status: 500,
+            body: `Error: ${error.message}`
+        };
+    }
+};
