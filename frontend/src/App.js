@@ -6,7 +6,7 @@ function App() {
   const [qrCode, setQrCode] = useState('');
 
   const generateQRCode = async () => {
-    const response = await fetch(`http://localhost:7071/api/generate-qrcode?text=${encodeURIComponent(text)}`);
+    const response = await fetch(`http://localhost:3001/api/GenerateQRCode?text=${encodeURIComponent(text)}`);
     const qrCodeData = await response.text();
     setQrCode(qrCodeData);
   };
