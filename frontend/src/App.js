@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
-const express = require('express');
-const app = express();
-const qrCodeRoutes = require('./routes/qrCodeGenerator'); // Import your routes
 
-app.use('/', qrCodeRoutes); // Use the routes
 
 function App() {
   const [text, setText] = useState('');
