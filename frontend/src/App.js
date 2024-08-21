@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 import './App.css';
+const express = require('express');
+const app = express();
+const qrCodeRoutes = require('./routes/qrCodeGenerator'); // Import your routes
+
+app.use('/', qrCodeRoutes); // Use the routes
 
 function App() {
   const [text, setText] = useState('');
@@ -7,8 +12,13 @@ function App() {
 
   const generateQRCode = async () => {
     const response = await fetch(`http://localhost:3001/api/GenerateQRCode?text=${encodeURIComponent(text)}`);
-    const qrCodeData = await response.text();
-    setQrCode(qrCodeData);
+    
+    // Ensure the response is a blob, which can represent the JPEG image
+    const blob = await response.blob();
+    
+    // Convert the blob to a URL to display as an image
+    const url = URL.createObjectURL(blob);
+    setQrCode(url);
   };
 
   return (
